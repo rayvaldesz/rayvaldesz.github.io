@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesontwerp 3 Havo 4 Vakdidactiek</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url('background.png');
+            background-size: cover;
+        }
+        #track {
+            width: 600px;
+            height: 20px;
+            background-color: #ccc;
+            margin: 50px auto;
+            position: relative;
+            transform-origin: top left;
+            border-bottom: none;
+        }
+        #path {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, red, red 5px, transparent 5px, transparent 10px);
+            width: 0;
+        }
+        #wagon {
+            width: 60px;
+            position: absolute;
+            bottom: 0;
+            left: 10px;
+        }
+        #distance-label {
+            position: absolute;
+            color: black;
+            font-size: 1em;
+            left: 10px;
+            top: 40px;
+        }
+        #controls {
+            margin-top: 160px;
+        }
+        #output, #timer, #angle-display {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lesontwerp 3 Havo 4 Vakdidactiek</h1>
+    <p>Door Raymond Valdes</p>
+    <div id="track">
+        <div id="path"></div>
+        <img id="wagon" src="wagon.png" alt="Wagontje">
+        <div id="distance-label">0.0 cm</div>
+    </div>
+    <div id="controls">
+        <label for="angle">Hellinghoek (graden):</label>
+        <input type="range" id="angle" min="0" max="90" value="0">
+        <span id="angle-display">0°</span>
+        <button id="toggle">Wagontje loslaten</button>
+        <button id="reset">Reset</button>
+    </div>
+    <div id="output">Afgelegde weg: 0.0 cm</div>
+    <div id="timer">Tijd: 0.0 s</div>
+
+    <script>
+        let wagon = document.getElementById('wagon');
+        let track = document.getElementById('track');
+        let path = document.getElementById('path');
+        let distanceLabel = document.getElementById('distance-label');
+        let angleInput = document.getElementById('angle');
+        let angleDisplay = document.getElementById('angle-display');
+        let toggleButton = document.getElementById('toggle');
+        let resetButton = document.getElementById('reset');
+        let output = document.getElementById('output');
+        let timerDisplay = document.getElementById('timer');
+        let interval, timeInterval;
+        let distance = 0, speed = 0, angle = 0, time = 0;
+        let isPaused = true;
+
+        function updateWagon() {
+            if (!isPaused) {
+                let radians = angle * Math.PI / 180;
+                speed += Math.sin(radians) * 0.1;
+                distance += speed;
+                wagon.style.left = (10 + distance) + 'px';
+                path.style.width = distance + 'px';
+                let formattedDistance = distance.toFixed(1) + " cm";
+                output.textContent = `Afgelegde weg: ${formattedDistance}`;
+                distanceLabel.textContent = formattedDistance;
+                distanceLabel.style.left = (10 + distance) + 'px';
+            }
+        }
+
+        toggleButton.addEventListener('click', () => {
+            isPaused = !isPaused;
+            if (!isPaused) {
+                toggleButton.textContent = "Pauze";
+                clearInterval(interval);
+                clearInterval(timeInterval);
+                interval = setInterval(updateWagon, 100);
+                timeInterval = setInterval(() => {
+                    if (!isPaused) {
+                        time += 0.1;
+                        timerDisplay.textContent = `Tijd: ${time.toFixed(1)} s`;
+                    }
+                }, 100);
+            } else {
+                toggleButton.textContent = "Wagontje loslaten";
+                clearInterval(interval);
+                clearInterval(timeInterval);
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            clearInterval(interval);
+            clearInterval(timeInterval);
+            distance = 0;
+            speed = 0;
+            time = 0;
+            isPaused = true;
+            wagon.style.left = '10px';
+            path.style.width = '0px';
+            output.textContent = 'Afgelegde weg: 0.0 cm';
+            timerDisplay.textContent = 'Tijd: 0.0 s';
+            distanceLabel.textContent = '0.0 cm';
+            distanceLabel.style.left = '10px';
+            toggleButton.textContent = "Wagontje loslaten";
+        });
+
+        angleInput.addEventListener('input', () => {
+            angle = parseFloat(angleInput.value);
+            angleDisplay.textContent = `${angle}°`;
+            track.style.transform = `rotate(${angle}deg)`;
+        });
+    </script>
+</body>
+</html>
